@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      donations: {
+        Row: {
+          created_at: string
+          description: string | null
+          dietary_info: string[] | null
+          expiry_time: string | null
+          food_type: string
+          id: string
+          latitude: number
+          longitude: number
+          pickup_window: string | null
+          quantity: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          dietary_info?: string[] | null
+          expiry_time?: string | null
+          food_type: string
+          id?: string
+          latitude: number
+          longitude: number
+          pickup_window?: string | null
+          quantity: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          dietary_info?: string[] | null
+          expiry_time?: string | null
+          food_type?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          pickup_window?: string | null
+          quantity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
