@@ -27,7 +27,20 @@ const DonationForm = () => {
   });
 
   const dietaryOptions = ["Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Halal", "Kosher"];
+  
+  // Helper to format Date to input[type="datetime-local"] value (YYYY-MM-DDTHH:mm)
+  const toLocalDateTimeInput = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const yyyy = date.getFullYear();
+    const mm = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mi = pad(date.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  };
 
+  const minExpiry = toLocalDateTimeInput(new Date());
+  
   const getLocation = () => {
     setGettingLocation(true);
     if (navigator.geolocation) {
@@ -88,7 +101,7 @@ const DonationForm = () => {
         description: formData.description,
         food_type: formData.foodType,
         quantity: formData.quantity,
-        expiry_time: formData.expiryTime || null,
+        expiry_time: formData.expiryTime ? new Date(formData.expiryTime).toISOString() : null,
         pickup_window: formData.pickupWindow,
         dietary_info: formData.dietaryInfo,
         latitude: location.lat,
@@ -98,11 +111,32 @@ const DonationForm = () => {
 
       if (error) throw error;
 
+      // In-app notification (persisted)
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        type: "donation_created",
+        title: "Donation created",
+        message: `Your donation "${formData.title}" is now live.`,
+      });
+
+      // Email notification via backend function
+      await supabase.functions.invoke("send-notification", {
+        body: {
+          to: user.email,
+          subject: "Thanks for your donation",
+          html: `<p>Hi,</p><p>Your donation "${formData.title}" has been created successfully.</p>`
+        }
+      });
+
       toast.success("Donation created successfully! 🎉");
       navigate("/map");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating donation:", error);
-      toast.error("Failed to create donation. Please try again.");
+      if (error?.message?.includes("row-level security")) {
+        toast.error("Permission issue while saving. Please ensure you are logged in.");
+      } else {
+        toast.error("Failed to create donation. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -166,7 +200,14 @@ const DonationForm = () => {
               <Input
                 id="expiryTime"
                 type="datetime-local"
+                min={minExpiry}
+                step={60}
                 value={formData.expiryTime}
+                onFocus={() => {
+                  if (!formData.expiryTime) {
+                    setFormData((prev) => ({ ...prev, expiryTime: minExpiry }));
+                  }
+                }}
                 onChange={(e) => setFormData({ ...formData, expiryTime: e.target.value })}
               />
             </div>

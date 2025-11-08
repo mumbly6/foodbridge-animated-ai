@@ -81,7 +81,7 @@ const RequestForm = () => {
         return;
       }
 
-      // Store request as a donation with status "requested" (we'll use the same table for simplicity)
+      // Store request as a donation with status "available" (same table for now)
       const { error } = await supabase.from("donations").insert({
         user_id: user.id,
         title: formData.title,
@@ -92,16 +92,37 @@ const RequestForm = () => {
         dietary_info: formData.dietaryInfo,
         latitude: location.lat,
         longitude: location.lng,
-        status: "available", // We can add a "type" column later to differentiate
+        status: "available",
       });
 
       if (error) throw error;
 
+      // In-app notification (persisted)
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        type: "request_created",
+        title: "Request submitted",
+        message: `Your request "${formData.title}" has been submitted.`,
+      });
+
+      // Email notification via backend function
+      await supabase.functions.invoke("send-notification", {
+        body: {
+          to: user.email,
+          subject: "Request submitted",
+          html: `<p>Hi,</p><p>Your request "${formData.title}" has been submitted successfully.</p>`
+        }
+      });
+
       toast.success("Request created successfully! 🙏");
       navigate("/map");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating request:", error);
-      toast.error("Failed to create request. Please try again.");
+      if (error?.message?.includes("row-level security")) {
+        toast.error("Permission issue while saving. Please ensure you are logged in.");
+      } else {
+        toast.error("Failed to create request. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
