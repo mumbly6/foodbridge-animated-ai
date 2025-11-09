@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          points_required: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon: string
+          id?: string
+          name: string
+          points_required: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          points_required?: number
+        }
+        Relationships: []
+      }
+      community_fridges: {
+        Row: {
+          address: string
+          created_at: string
+          description: string | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           created_at: string
@@ -62,6 +119,39 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      dropoff_locations: {
+        Row: {
+          address: string
+          created_at: string
+          description: string | null
+          hours: string | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          description?: string | null
+          hours?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          description?: string | null
+          hours?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
         }
         Relationships: []
       }
@@ -123,6 +213,65 @@ export type Database = {
           id?: string
           phone?: string | null
           role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          created_at: string
+          donations_count: number
+          id: string
+          points: number
+          requests_fulfilled: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          donations_count?: number
+          id?: string
+          points?: number
+          requests_fulfilled?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          donations_count?: number
+          id?: string
+          points?: number
+          requests_fulfilled?: number
           updated_at?: string
           user_id?: string
         }

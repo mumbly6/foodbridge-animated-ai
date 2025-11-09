@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import InteractiveMap from "@/components/InteractiveMap";
 
 interface Donation {
   id: string;
@@ -76,32 +77,9 @@ const Map = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map Placeholder */}
-          <div className="lg:col-span-2 rounded-2xl border bg-card p-8 shadow-medium">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center min-h-[500px]">
-              <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground animate-pulse-glow">
-                <MapPin className="h-10 w-10" />
-              </div>
-              <h2 className="text-2xl font-semibold text-foreground">Interactive Map Coming Soon</h2>
-              <p className="text-muted-foreground max-w-md">
-                We're building an amazing real-time map to show all available food donations.
-                For now, view all donations in the list below.
-              </p>
-              <div className="grid gap-2 pt-4 w-full max-w-md">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-3 w-3 rounded-full bg-primary"></div>
-                  <span>Available Donations</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-3 w-3 rounded-full bg-secondary"></div>
-                  <span>Community Fridges</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-3 w-3 rounded-full bg-accent"></div>
-                  <span>Drop-off Locations</span>
-                </div>
-              </div>
-            </div>
+          {/* Interactive Map */}
+          <div className="lg:col-span-2 rounded-2xl border bg-card shadow-medium overflow-hidden h-[600px]">
+            <InteractiveMap />
           </div>
 
           {/* Donations List */}

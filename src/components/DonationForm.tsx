@@ -128,6 +128,51 @@ const DonationForm = () => {
         }
       });
 
+      // Update user stats and award points
+      const { data: stats } = await supabase
+        .from('user_stats')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (stats) {
+        await supabase
+          .from('user_stats')
+          .update({
+            points: stats.points + 10,
+            donations_count: stats.donations_count + 1,
+          })
+          .eq('user_id', user.id);
+      } else {
+        await supabase.from('user_stats').insert({
+          user_id: user.id,
+          points: 10,
+          donations_count: 1,
+        });
+      }
+
+      // Check for badge eligibility
+      const { data: allBadges } = await supabase.from('badges').select('*');
+      const { data: userBadges } = await supabase
+        .from('user_badges')
+        .select('badge_id')
+        .eq('user_id', user.id);
+
+      const earnedBadgeIds = new Set(userBadges?.map(b => b.badge_id) || []);
+      const newPoints = stats ? stats.points + 10 : 10;
+
+      for (const badge of allBadges || []) {
+        if (!earnedBadgeIds.has(badge.id) && newPoints >= badge.points_required) {
+          await supabase.from('user_badges').insert({
+            user_id: user.id,
+            badge_id: badge.id,
+          });
+          toast.success(`🎉 Badge Unlocked: ${badge.name}!`, {
+            description: badge.description,
+          });
+        }
+      }
+
       toast.success("Donation created successfully! 🎉");
       navigate("/map");
     } catch (error: any) {

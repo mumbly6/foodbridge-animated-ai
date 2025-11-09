@@ -3,9 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Plus, MapPin, Package, Users, Heart, TrendingUp, HandHeart } from "lucide-react";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Leaderboard from "@/components/Leaderboard";
+import BadgesDisplay from "@/components/BadgesDisplay";
+import ProfileProgress from "@/components/ProfileProgress";
 import DonationForm from "@/components/DonationForm";
 import RequestForm from "@/components/RequestForm";
 
@@ -32,7 +35,7 @@ const Dashboard = () => {
       if (!session) {
         navigate("/auth");
       } else {
-        setUser(session?.user);
+        setUser(session.user);
       }
     });
 
@@ -41,40 +44,35 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    toast.success("Signed out successfully");
     navigate("/");
+    toast.success("Signed out successfully");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-hero">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="animate-pulse text-lg text-foreground">Loading...</div>
       </div>
     );
   }
 
-  const userRole = user?.user_metadata?.role || "donor";
-
   return (
     <div className="min-h-screen bg-gradient-hero">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center justify-between animate-fade-in">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome to Smart FoodBridge</p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Smart FoodBridge</h1>
+            <p className="text-muted-foreground">Welcome back, {user?.email}!</p>
           </div>
-          <Button onClick={handleSignOut} variant="outline" className="gap-2">
-            <LogOut className="h-4 w-4" />
-            Logout
+          <Button onClick={handleSignOut} variant="outline">
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Dashboard</TabsTrigger>
             <TabsTrigger value="donate">Give Food</TabsTrigger>
             <TabsTrigger value="request">Request Food</TabsTrigger>
           </TabsList>
@@ -123,17 +121,24 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="text-3xl font-bold text-foreground">23</div>
-                    <MapPin className="h-8 w-8 text-primary" />
+                    <div className="text-3xl font-bold text-foreground">12</div>
+                    <Package className="h-8 w-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Leaderboard />
+              <BadgesDisplay />
+            </div>
+
+            <ProfileProgress />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border hover:shadow-glow transition-all duration-300">
                 <CardHeader>
-                  <CardTitle>View Donations Map</CardTitle>
+                  <CardTitle>Food Donation Map</CardTitle>
                   <CardDescription>
                     See all available food donations and drop-off locations near you
                   </CardDescription>
