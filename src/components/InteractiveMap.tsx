@@ -112,6 +112,16 @@ function MapUpdater({ donations, fridges, dropoffs }: {
 
   return null;
 }
+function MapInvalidateSize() {
+  const map = useMap();
+  useEffect(() => {
+    const id = setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+    return () => clearTimeout(id);
+  }, [map]);
+  return null;
+}
 
 const InteractiveMap = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -138,11 +148,20 @@ const InteractiveMap = () => {
   };
 
   const fetchDonations = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('donations')
       .select('id, title, latitude, longitude, food_type, quantity')
       .eq('status', 'available');
-    if (data) setDonations(data);
+    if (!error && data) {
+      const cleaned = data
+        .map(d => ({
+          ...d,
+          latitude: Number(d.latitude),
+          longitude: Number(d.longitude),
+        }))
+        .filter(d => Number.isFinite(d.latitude) && Number.isFinite(d.longitude));
+      setDonations(cleaned);
+    }
   };
 
   const fetchFridges = async () => {
@@ -174,13 +193,15 @@ const InteractiveMap = () => {
       <MapContainer 
         center={[40.7128, -74.0060]} 
         zoom={12} 
-        style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={true}
+        className="h-full w-full"
+        scrollWheelZoom
       >
+        <MapInvalidateSize />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        
         
         <MapUpdater donations={donations} fridges={fridges} dropoffs={dropoffs} />
 
