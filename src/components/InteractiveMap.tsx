@@ -122,7 +122,7 @@ function MapInvalidateSize() {
   return null;
 }
 
-const InteractiveMap = () => {
+export const InteractiveMap = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [fridges, setFridges] = useState<CommunityFridge[]>([]);
   const [dropoffs, setDropoffs] = useState<DropoffLocation[]>([]);
