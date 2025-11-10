@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import InteractiveMap from "@/components/InteractiveMap";
+import SimpleMap from "@/components/SimpleMap";
 
 interface Donation {
   id: string;
@@ -79,7 +79,7 @@ const Map = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Interactive Map */}
           <div className="lg:col-span-2 rounded-2xl border bg-card shadow-medium overflow-hidden h-[600px]">
-            <InteractiveMap />
+            <SimpleMap />
           </div>
 
           {/* Donations List */}
