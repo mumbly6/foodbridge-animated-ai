@@ -13,8 +13,8 @@ interface Donation {
   description: string;
   food_type: string;
   quantity: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | string;
+  longitude: number | string;
   dietary_info: string[];
   pickup_window: string;
   status: string;
@@ -140,7 +140,7 @@ const Map = () => {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
                         <MapPin className="h-3 w-3" />
                         <span>
-                          {donation.latitude.toFixed(4)}, {donation.longitude.toFixed(4)}
+                          {Number(donation.latitude).toFixed(4)}, {Number(donation.longitude).toFixed(4)}
                         </span>
                       </div>
                     </CardContent>

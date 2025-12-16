@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Donation {
   id: string;
   title: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | string;
+  longitude: number | string;
   food_type: string;
 }
 
@@ -32,14 +35,26 @@ const SimpleMap = () => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
+    // Fix Leaflet's default icon paths for Vite builds
+    // (otherwise markers can be invisible even though they're "there")
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: markerIcon2x,
+      iconUrl: markerIcon,
+      shadowUrl: markerShadow,
+    });
+
     // Initialize map
-    const map = L.map(mapContainerRef.current).setView([40.7128, -74.0060], 12);
+    const map = L.map(mapContainerRef.current).setView([40.7128, -74.006], 12);
     mapRef.current = map;
 
     // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
     }).addTo(map);
+
+    // Ensure correct render size after mount
+    window.setTimeout(() => map.invalidateSize(), 250);
 
     return () => {
       if (mapRef.current) {
@@ -50,7 +65,7 @@ const SimpleMap = () => {
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current || donations.length === 0) return;
+    if (!mapRef.current) return;
 
     // Clear existing markers
     mapRef.current.eachLayer((layer) => {
@@ -59,19 +74,25 @@ const SimpleMap = () => {
       }
     });
 
+    if (donations.length === 0) return;
+
     // Add markers for donations
     const bounds = L.latLngBounds([]);
-    
+
     donations.forEach((donation) => {
-      const marker = L.marker([donation.latitude, donation.longitude])
+      const lat = typeof donation.latitude === "string" ? parseFloat(donation.latitude) : donation.latitude;
+      const lng = typeof donation.longitude === "string" ? parseFloat(donation.longitude) : donation.longitude;
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      L.marker([lat, lng])
         .addTo(mapRef.current!)
         .bindPopup(`<strong>${donation.title}</strong><br/>${donation.food_type}`);
-      
-      bounds.extend([donation.latitude, donation.longitude]);
+
+      bounds.extend([lat, lng]);
     });
 
     // Fit map to show all markers
-    if (donations.length > 0) {
+    if (bounds.isValid()) {
       mapRef.current.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [donations]);
